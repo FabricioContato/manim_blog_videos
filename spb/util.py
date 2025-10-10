@@ -84,52 +84,81 @@ def add_parallel_audioTTS_with_animation(scene, animation, text, cue_word, file_
 from manim import *
 from numpy import array
 
-def typing_animation_with_cursor(text: str, cursor: Rectangle, scene: Scene):
+def typing_animation_with_cursor(text: str, color, cursor: Rectangle, scene: Scene, scale=1, wait_time=.1):
+    cursor.scale(scale)
+    cursor_line_start_ref = cursor.copy()
     math_char_aling_dic = {'"': UP, '=': array([0., 0., 0.])}
     math_chars = ['"', "="]
-
-    wait_time = .2
-    cursor_line_start_ref = cursor.copy()
-
     special_chars = [" ", "\n"]
-    text_obj_list = [char if char in special_chars else MathTex(char, should_center=True) if char in math_chars else Text(char) for char in text]
-    last_text_obj = None
+    under_base_line_chars = ['g', 'j', 'p', 'q', 'y']
+
+    
+    last_char = None
     line_first_printalbe_char = None
 
-    for text_obj in text_obj_list:
+    def is_an_under_base_line_char(char):
+        return char in under_base_line_chars
 
-        if text_obj == "\n":
-            last_text_obj = None
+    def char_to_manim_obj(char):
+        return MathTex(char, color=color).scale(scale) if char in math_chars else Text(char, color=color).scale(scale)
+
+    def move_cursor_foward():
+        if last_char:
+            cursor.next_to(last_char, RIGHT, buff=0.025)
+        else:
+            cursor.next_to(cursor, RIGHT, buff=0)
+        
+        cursor.align_to(cursor_line_start_ref, DOWN)
+
+    def line_feed():
+        cursor.next_to(cursor_line_start_ref, DOWN, buff=0.2, aligned_edge=LEFT)
+        cursor_line_start_ref.move_to(cursor)
+
+    def print_char(char_obj, print_under_base_line=False):
+        #text_height = char.height
+        #aligned_edge = (DOWN + LEFT) if type(char) is Text or type(char) is str else math_char_aling_dic[char]
+        aligned_edge = math_char_aling_dic[char] if char in math_chars else (DOWN + LEFT)
+        char_obj.move_to(cursor.get_center())
+        char_obj.align_to(cursor, aligned_edge)
+        if print_under_base_line:
+            char_obj.shift(DOWN * (char_obj.height * 0.3) )
+        #char.next_to(cursor, DOWN, buff=-1*text_height, aligned_edge=aligned_edge)
+
+    for char in text:
+
+        if char == "\n": #Line feed
+            last_char = None
             line_first_printalbe_char = None
             scene.remove(cursor)
-            cursor.next_to(cursor_line_start_ref, DOWN, aligned_edge=LEFT)
-            cursor_line_start_ref.move_to(cursor)
-            continue
-        elif text_obj == " ":
-            last_text_obj = None
-            cursor.next_to(cursor, RIGHT, aligned_edge=DOWN+LEFT)
+            line_feed()
             continue
 
-        elif line_first_printalbe_char == None:
-            line_first_printalbe_char = text_obj
+        elif char == " ": #blank space
+            last_char = None
+            move_cursor_foward()
+            if line_first_printalbe_char:
+                scene.wait(wait_time)
+            continue
+
+        elif line_first_printalbe_char == None: #first line printalbe char
+            char_obj = char_to_manim_obj(char)
+            line_first_printalbe_char = char_obj
             scene.add(cursor)
             scene.wait(wait_time)
-            last_text_obj = text_obj
-            text_width = text_obj.width
-            aligned_edge = DOWN if type(text_obj) is Text or type(text_obj) is str else math_char_aling_dic[text_obj.tex_string]
-            text_obj.next_to(cursor, LEFT, buff=-1*text_width, aligned_edge=aligned_edge)
+            last_char = char_obj
+            print_char(char_obj, print_under_base_line=is_an_under_base_line_char(char))
 
-        elif last_text_obj == None:
-            last_text_obj = text_obj
-            text_width = text_obj.width
-            aligned_edge = DOWN if type(text_obj) is Text or type(text_obj) is str else math_char_aling_dic[text_obj.tex_string]
-            text_obj.next_to(cursor, LEFT, buff=-1*text_width, aligned_edge=aligned_edge)
-        else:
-            aligned_edge = DOWN if type(text_obj) is Text or type(text_obj) is str else math_char_aling_dic[text_obj.tex_string]
-            text_obj.next_to(last_text_obj, RIGHT, buff=0, aligned_edge=aligned_edge)
-            last_text_obj = text_obj
+        elif last_char == None: # not first lpc and the last char was a npc
+            char_obj = char_to_manim_obj(char)
+            last_char = char_obj
+            print_char(char_obj, print_under_base_line=is_an_under_base_line_char(char))
+        
+        else: # a pc following another pc
+            char_obj = char_to_manim_obj(char)
+            print_char(char_obj, print_under_base_line=is_an_under_base_line_char(char))
+            last_char = char_obj
         
         scene.add(cursor)
-        cursor.next_to(text_obj, RIGHT, aligned_edge=DOWN+LEFT)
-        scene.add(text_obj)
+        move_cursor_foward()
+        scene.add(char_obj)
         scene.wait(wait_time)

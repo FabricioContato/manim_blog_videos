@@ -45,19 +45,24 @@ class SPB_1(Scene):
 
 text = """
 <html>
-  <head>
-    <meta charset="UTF-8">
-  </head>
+ <head>
+  <meta charset="UTF-8">
+ </head>
   <body>
-    <header>
-      <div class="container-fluid">
+   <header>
+     <div class="container-fluid">
+       <a class="navbar-brand" href="/">
+         <span>&#60;<i class="bi bi-house-door-fill"></i>&#62;</span>
+           </a>
+           <button class="navbar-toggler">
+            <span class="navbar-toggler-icon"></span>
 
 """
 
 class SPB_2(Scene):
     def construct(self):
         self.camera.background_color = BLACK
-        pc_case = Rectangle(WHITE, 8, 11)
+        pc_case = Rectangle(WHITE, 9, 16)
         pc_screen = pc_case.copy().set_color(GREEN).scale(0.9)
         self.play(Write(pc_case), Write(pc_screen))
 
@@ -66,17 +71,8 @@ class SPB_2(Scene):
 
         cursor.next_to(pc_screen, LEFT, buff=-.6, aligned_edge=UP)
         cursor = cursor.scale(.5)
-        # I am planing a typing animation
-        # https://www.reddit.com/r/manim/comments/1ag560t/typing_animation_with_blinking_cursor/
         self.add(cursor)
 
-        typing_animation_with_cursor(text=text, cursor=cursor, scene=self)
+        typing_animation_with_cursor(text=text, color=GREEN, scale=0.5, wait_time=0.25, cursor=cursor, scene=self)
 
         self.wait(2)
-    
-  
-
-        #self.play(cursor.animate.move_to(cursor, RIGHT))
-         #t = Text(text).scale(.8)
-         #t.next_to(cursor.get_center(), RIGHT, aligned_edge=UP)
-         #self.play(AddTextLetterByLetter(t, time_per_char=.2 ))
