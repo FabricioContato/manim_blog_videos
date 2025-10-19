@@ -88,9 +88,11 @@ class TagObj:
         self.initiate_scene_objects()
 
     def initiate_scene_objects(self):
-        self.identation_sqr = Rectangle(YELLOW, 3, 3)
-        self.tag_rect = Rectangle(YELLOW, 1.5, 3)
-        self.text_rect = Rectangle(YELLOW, 1.5, 3)
+        WIDTH = 6
+        HEIGHT = 1.15
+        self.identation_sqr = Rectangle(YELLOW, HEIGHT, WIDTH/4)
+        self.tag_rect = Rectangle(YELLOW, HEIGHT/2, WIDTH/2)
+        self.text_rect = Rectangle(YELLOW, HEIGHT/2, WIDTH/2)
         
         self.tag_rect.next_to(self.identation_sqr, RIGHT, aligned_edge=UP, buff=0)
         self.text_rect.next_to(self.identation_sqr, RIGHT, aligned_edge=DOWN, buff=0)
@@ -106,10 +108,45 @@ class TagObj:
         self.group = VGroup(self.identation_sqr, self.tag_rect, self.text_rect, self.identation_Text, self.tag_Text, self.text_Text)
 
 
+class Queue:
+    def __init__(self, scene: Scene, initial_position):
+        self.queue = []
+        self.scene = scene
+        self.initial_position = initial_position
+
+    def add(self, obj):
+        if len(self.queue) == 0:
+            obj.move_to(self.initial_position)
+        else:
+            obj.next_to(self.queue[-1], DOWN, buff=0.2)
+
+        self.scene.play(FadeIn(obj))
+        self.queue.append(obj)
+
+class SPB_Stack:
+    def __init__(self, scene: Scene, initial_position, width=4.8, height=1.15*5):
+        self.stack = []
+        self.scene = scene
+        self.initial_position = initial_position
+        self.width = width
+        self.height = height
+
+    def initiate_scene_objects(self):
+        pass
+
+
+
+
 class SPB_3(Scene):
     def construct(self):
         self.camera.background_color = BLACK
         to1 = TagObj(scene=self, tag="#card-title", identation=1, text="place holder")
         to2 = TagObj(scene=self, tag="#div", identation=0, text="place holder2")
-        to2.group.next_to(to1.group, DOWN)
-        self.add(to1.group, to2.group)
+        to3 = TagObj(scene=self, tag="#h2", identation=2, text="place holder3")
+        q1 = Queue(scene=self, initial_position=UP*3)
+
+        q1.add(to1.group)
+        q1.add(to2.group)
+        q1.add(to3.group)
+
+
