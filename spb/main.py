@@ -134,9 +134,6 @@ class SPB_Stack:
     def initiate_scene_objects(self):
         pass
 
-
-
-
 class SPB_3(Scene):
     def construct(self):
         self.camera.background_color = BLACK
