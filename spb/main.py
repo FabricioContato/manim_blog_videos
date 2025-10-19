@@ -76,3 +76,40 @@ class SPB_2(Scene):
         typing_animation_with_cursor(text=text, color=GREEN, scale=0.5, wait_time=0.25, cursor=cursor, scene=self)
 
         self.wait(2)
+
+class TagObj:
+    def __init__(self, scene: Scene, tag: str, identation: int, text: str, text_scale=0.5, tag_scale=0.5):
+        self.scene = scene
+        self.tag = tag
+        self.identation = identation
+        self.text = text
+        self.text_scale = text_scale
+        self.tag_scale = tag_scale
+        self.initiate_scene_objects()
+
+    def initiate_scene_objects(self):
+        self.identation_sqr = Rectangle(YELLOW, 3, 3)
+        self.tag_rect = Rectangle(YELLOW, 1.5, 3)
+        self.text_rect = Rectangle(YELLOW, 1.5, 3)
+        
+        self.tag_rect.next_to(self.identation_sqr, RIGHT, aligned_edge=UP, buff=0)
+        self.text_rect.next_to(self.identation_sqr, RIGHT, aligned_edge=DOWN, buff=0)
+
+        self.identation_Text = Text(str(self.identation))
+        self.tag_Text = Text(self.tag).scale(self.tag_scale)
+        self.text_Text = Text(self.text).scale(self.text_scale)
+
+        self.identation_Text.move_to(self.identation_sqr.get_center())
+        self.tag_Text.move_to(self.tag_rect.get_center())
+        self.text_Text.move_to(self.text_rect.get_center())
+
+        self.group = VGroup(self.identation_sqr, self.tag_rect, self.text_rect, self.identation_Text, self.tag_Text, self.text_Text)
+
+
+class SPB_3(Scene):
+    def construct(self):
+        self.camera.background_color = BLACK
+        to1 = TagObj(scene=self, tag="#card-title", identation=1, text="place holder")
+        to2 = TagObj(scene=self, tag="#div", identation=0, text="place holder2")
+        to2.group.next_to(to1.group, DOWN)
+        self.add(to1.group, to2.group)
